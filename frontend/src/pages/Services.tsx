@@ -1,37 +1,31 @@
-
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Services = () => {
   const services = [
     {
       title: "Wedding Decoration",
       description: "Transform your special day with elegant decorations that create the perfect ambiance.",
-      price: "Contact for Quote",
     },
     {
       title: "Reception Setup",
       description: "Complete reception setup with elegant table arrangements and stunning decor elements.",
-      price: "Contact for Quote",
     },
     {
       title: "Sangeet Decoration",
       description: "Vibrant and festive decorations perfect for sangeet celebrations.",
-      price: "Contact for Quote",
     },
     {
       title: "Haldi Decoration",
       description: "Traditional and bright decorations for your haldi ceremony.",
-      price: "Contact for Quote",
     },
     {
       title: "Rental Furniture",
       description: "High-quality furniture rentals for all your event needs.",
-      price: "Contact for Quote",
     },
     {
       title: "Sitting Arrangement",
       description: "Strategic and comfortable seating arrangements for all types of events.",
-      price: "Contact for Quote",
     },
   ];
 
@@ -60,7 +54,12 @@ const Services = () => {
             >
               <h3 className="text-xl font-semibold mb-4">{service.title}</h3>
               <p className="text-gray-600 mb-4">{service.description}</p>
-              <p className="text-gold font-semibold">{service.price}</p>
+              <Link
+                to={`/booking?service=${encodeURIComponent(service.title)}`}
+                className="text-gold font-semibold hover:underline cursor-pointer"
+              >
+                Contact for Quote
+              </Link>
             </motion.div>
           ))}
         </div>

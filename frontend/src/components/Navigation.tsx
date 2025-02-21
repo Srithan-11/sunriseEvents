@@ -43,10 +43,11 @@ const Navigation = () => {
               src="/images/bde85e7d-7e0c-4bc9-b154-6d26e80b7c82.png" 
               alt="Sunrise Events" 
               className="h-16 w-auto"
+            
             />
           </Link>
 
-          {/* Desktop Navigation */}
+            {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8">
             {navLinks.map((link) => (
               <Link

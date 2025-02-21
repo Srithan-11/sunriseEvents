@@ -1,45 +1,66 @@
-import axios from "axios";
+const API_BASE_URL = "http://localhost:5002/api/bookings";
 
-const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, ""); // ✅ Ensure no trailing slash
-
-// 🚨 Validate API URL
-if (!API_URL) {
-  console.error("🚨 API URL is missing. Please check your .env file.");
-  throw new Error("Missing API URL in environment variables.");
-}
-
-// ✅ Define types
-export interface ContactData {
-  name: string;
-  email: string;
-  message: string;
-}
-
-export interface BookingData {
-  customerName: string;
-  eventDate: string;
-  services: string[];
-}
-
-// ✅ Generic API Request Handler
-const apiRequest = async <T>(method: "GET" | "POST", endpoint: string, data?: any): Promise<T> => {
+// ✅ Fetch all bookings
+export const fetchBookings = async () => {
   try {
-    const response = await axios({ method, url: `${API_URL}${endpoint}`, data });
-    return response.data;
-  } catch (error: any) {
-    console.error(`🚨 Error in ${method} ${endpoint}:`, error.response?.data || error.message);
-    throw new Error(error.response?.data?.error || `Failed to process ${endpoint}`);
+    const response = await fetch(API_BASE_URL);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch bookings: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("❌ Error fetching bookings:", error);
+    throw error;
   }
 };
 
-// ✅ Add Contact
-export const createContact = (contactData: ContactData) => apiRequest<ContactData>("POST", "/api/contacts", contactData);
+// ✅ Create a new booking
+export const createBooking = async (bookingData: any) => {
+  try {
+    console.log("📩 Raw Data Before Processing:", bookingData);
 
-// ✅ Fetch Contacts
-export const getContacts = () => apiRequest<ContactData[]>("GET", "/api/contacts");
+    // ✅ Remove non-numeric characters
+    let phoneNumber = bookingData.phoneNumber.replace(/\D/g, ""); 
 
-// ✅ Add Booking
-export const createBooking = (booking: BookingData) => apiRequest<BookingData>("POST", "/api/bookings", booking);
+    // ✅ Remove "+91" if it exists
+    if (phoneNumber.startsWith("91") && phoneNumber.length > 10) {
+      phoneNumber = phoneNumber.substring(2); // Remove first two digits
+    }
 
-// ✅ Fetch Bookings
-export const fetchBookings = () => apiRequest<BookingData[]>("GET", "/api/bookings");
+    // ✅ Ensure exactly 10 digits
+    if (phoneNumber.length !== 10) {
+      console.error("❌ Invalid phone number:", phoneNumber);
+      throw new Error("Phone number must be exactly 10 digits.");
+    }
+
+    // ✅ Create formatted data
+    const processedBookingData = {
+      ...bookingData,
+      phoneNumber, // Store only 10-digit number
+    };
+
+    console.log("📩 Final Data Sent to Backend:", processedBookingData);
+
+    // ✅ Send request
+    const response = await fetch(API_BASE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(processedBookingData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Backend Error:", errorData);
+      throw new Error(errorData.error || "Failed to process booking request");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("❌ Error in createBooking:", error.message);
+    throw error;
+  }
+};
